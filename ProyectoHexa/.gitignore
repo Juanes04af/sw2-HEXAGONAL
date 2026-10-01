@@ -1,1 +1,1 @@
-/target/
+# Compilacionecho /target/echo # Credencialesecho .envecho src/main/resources/db.propertiesecho # IDEsecho .idea/echo *.imlecho .vscode/echo nbactions.xmlecho # Sistema operativo y logsecho Thumbs.dbecho *.log
