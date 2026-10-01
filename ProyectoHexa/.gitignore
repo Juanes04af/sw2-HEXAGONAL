@@ -1,1 +1,17 @@
-# Compilacionecho /target/echo # Credencialesecho .envecho src/main/resources/db.propertiesecho # IDEsecho .idea/echo *.imlecho .vscode/echo nbactions.xmlecho # Sistema operativo y logsecho Thumbs.dbecho *.log
+# Compilacion
+/target/
+
+# Credenciales (nunca se suben)
+.env
+src/main/resources/db.properties
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+nbactions.xml
+
+# Sistema operativo / logs
+Thumbs.db
+.DS_Store
+*.log

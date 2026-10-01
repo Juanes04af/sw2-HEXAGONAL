@@ -69,9 +69,7 @@
                 <version>0.0.8</version>
 
                 <configuration>
-                    <mainClass>
-                        co.edu.poli.sw2.infraestructura.web.App
-                    </mainClass>
+                    <mainClass>co.edu.poli.sw2/co.edu.poli.sw2.ProyectoHexa.infraestructura.web.App</mainClass>
                 </configuration>
             </plugin>
 

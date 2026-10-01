@@ -12,21 +12,44 @@ import co.edu.poli.sw2.ProyectoHexa.dominio.excepcion.ConexionBDException;
 /**
  * Gestiona las conexiones JDBC con PostgreSQL.
  *
- * Implementa el patron Singleton para mantener una unica
- * instancia encargada de la configuracion de conexion.
+ * <p>
+ * Implementa el patron <b>Singleton</b> mediante double-checked locking:
+ * el constructor es privado y {@link #getInstancia()} es el unico punto
+ * de acceso, de modo que toda la aplicacion comparte una misma
+ * configuracion de conexion.
+ * </p>
+ *
+ * <p>
+ * Las credenciales se resuelven en este orden de prioridad:
+ * </p>
+ * <ol>
+ *   <li>Variables de entorno del sistema operativo</li>
+ *   <li>Archivo {@code .env} en la raiz del proyecto</li>
+ *   <li>Archivo {@code db.properties} en el classpath</li>
+ * </ol>
  *
  * @author Alejandra Cano y Juan Rosero
+ * @see CargadorEnv
  */
 public final class ConexionBD {
 
+    /** Unica instancia. Es volatil para que el double-checked locking sea seguro. */
     private static volatile ConexionBD instancia;
 
+    /** URL JDBC de la base de datos. */
     private final String urlBD;
+
+    /** Usuario de la base de datos. */
     private final String usuarioBD;
+
+    /** Contrasenia de la base de datos. */
     private final String passwordBD;
 
     /**
-     * Construye internamente el gestor de conexion.
+     * Constructor privado: solo se puede instanciar desde
+     * {@link #getInstancia()}.
+     *
+     * @throws ConexionBDException si no se encuentra el driver de PostgreSQL
      */
     private ConexionBD() {
 
@@ -86,16 +109,20 @@ public final class ConexionBD {
     }
 
     /**
-     * Abre una conexion JDBC.
+     * Abre una nueva conexion JDBC. Quien la obtiene es
+     * responsable de cerrarla.
      *
      * @return conexion abierta
+     * @throws ConexionBDException si faltan credenciales o el servidor no responde
      */
     public Connection obtenerConexion() {
 
         if (usuarioBD == null || passwordBD == null) {
 
             throw new ConexionBDException(
-                    "Faltan las credenciales de la base de datos.");
+                    "Faltan las credenciales de la base de datos. "
+                  + "Defina DB_USER y DB_PASSWORD en el archivo .env "
+                  + "de la raiz del proyecto.");
         }
 
         try {
@@ -107,20 +134,21 @@ public final class ConexionBD {
 
         } catch (SQLException e) {
 
-            throw new ConexionBDException(
-                    "No fue posible conectarse con PostgreSQL.", e);
+        	throw new ConexionBDException(
+                    "No fue posible conectarse con PostgreSQL: "
+                  + e.getMessage(), e);
         }
     }
 
     /**
-     * Obtiene una propiedad usando variables de entorno
-     * o db.properties.
+     * Resuelve un valor de configuracion recorriendo las fuentes
+     * por prioridad: variable de entorno, archivo .env y db.properties.
      *
-     * @param propiedades propiedades
-     * @param variableEntorno variable de entorno
-     * @param propiedad nombre de propiedad
-     * @param defecto valor por defecto
-     * @return valor encontrado
+     * @param propiedades     propiedades leidas de db.properties
+     * @param variableEntorno nombre de la variable de entorno y clave del .env
+     * @param propiedad       nombre de la clave en db.properties
+     * @param defecto         valor si ninguna fuente aporta un dato
+     * @return el primer valor no vacio encontrado, o {@code defecto}
      */
     private static String resolver(Properties propiedades,
                                    String variableEntorno,
@@ -129,13 +157,19 @@ public final class ConexionBD {
 
         String valor = System.getenv(variableEntorno);
 
-        if (valor != null && !valor.isBlank()) {
+        if (esUtil(valor)) {
+            return valor;
+        }
+
+        valor = CargadorEnv.obtener(variableEntorno);
+
+        if (esUtil(valor)) {
             return valor;
         }
 
         valor = propiedades.getProperty(propiedad);
 
-        if (valor != null && !valor.isBlank()) {
+        if (esUtil(valor)) {
             return valor;
         }
 
@@ -143,9 +177,20 @@ public final class ConexionBD {
     }
 
     /**
-     * Carga db.properties.
+     * Indica si un valor de configuracion es utilizable.
      *
-     * @return propiedades encontradas
+     * @param valor cadena a evaluar
+     * @return {@code true} si no es nula ni esta en blanco
+     */
+    private static boolean esUtil(String valor) {
+
+        return valor != null && !valor.isBlank();
+    }
+
+    /**
+     * Carga db.properties del classpath, si existe. Es una fuente opcional.
+     *
+     * @return propiedades encontradas, o un objeto vacio
      */
     private static Properties cargarPropiedades() {
 
@@ -164,5 +209,16 @@ public final class ConexionBD {
         }
 
         return propiedades;
+    }
+
+    /**
+     * Representacion segura: nunca expone usuario ni contrasenia.
+     *
+     * @return cadena fija sin credenciales
+     */
+    @Override
+    public String toString() {
+
+        return "ConexionBD[configurada]";
     }
 }
