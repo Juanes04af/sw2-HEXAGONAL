@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -42,185 +43,196 @@
 
     </top>
 
-
     <!-- ============================= -->
-    <!-- FORMULARIO                    -->
+    <!-- FORMULARIO CON DESPLAZAMIENTO -->
     <!-- ============================= -->
 
     <left>
 
-        <VBox
-                prefWidth="330"
-                spacing="15">
+        <ScrollPane
+                fitToWidth="true"
+                fitToHeight="false"
+                hbarPolicy="NEVER"
+                vbarPolicy="AS_NEEDED"
+                pannable="true"
+                prefWidth="345.0"
+                minWidth="300.0"
+                maxWidth="345.0"
+                styleClass="scroll-formulario">
 
-            <padding>
+            <content>
 
-                <Insets
-                        top="16"
-                        right="16"
-                        bottom="16"
-                        left="16" />
+                <VBox
+                        spacing="15"
+                        fillWidth="true">
 
-            </padding>
+                    <padding>
+                        <Insets
+                                top="16"
+                                right="16"
+                                bottom="16"
+                                left="16" />
+                    </padding>
 
+                    <!-- ===================== -->
+                    <!-- DATOS DEL DRON        -->
+                    <!-- ===================== -->
 
-            <VBox
-                    spacing="9"
-                    styleClass="tarjeta">
+                    <VBox
+                            spacing="9"
+                            styleClass="tarjeta">
 
-                <Label
-                        styleClass="titulo-seccion"
-                        text="DRONE DE VIGILANCIA" />
+                        <Label
+                                styleClass="titulo-seccion"
+                                text="DRONE DE VIGILANCIA" />
 
-                <Label
-                        styleClass="etiqueta-campo"
-                        text="Serial" />
+                        <Label
+                                styleClass="etiqueta-campo"
+                                text="Serial" />
 
-                <TextField
-                        fx:id="txtSerial"
-                        promptText="Ej: VIG-001" />
+                        <TextField
+                                fx:id="txtSerial"
+                                promptText="Ej: VIG-001" />
 
+                        <Label
+                                styleClass="etiqueta-campo"
+                                text="Fabricante" />
 
-                <Label
-                        styleClass="etiqueta-campo"
-                        text="Fabricante" />
+                        <TextField
+                                fx:id="txtFabricante"
+                                promptText="Ej: DJI" />
 
-                <TextField
-                        fx:id="txtFabricante"
-                        promptText="Ej: DJI" />
+                        <Label
+                                styleClass="etiqueta-campo"
+                                text="Modelo" />
 
+                        <TextField
+                                fx:id="txtModelo"
+                                promptText="Ej: Mavic 3" />
 
-                <Label
-                        styleClass="etiqueta-campo"
-                        text="Modelo" />
+                        <Label
+                                styleClass="etiqueta-campo"
+                                text="Peso (kg)" />
 
-                <TextField
-                        fx:id="txtModelo"
-                        promptText="Ej: Mavic 3" />
+                        <TextField
+                                fx:id="txtPeso"
+                                promptText="Ej: 0.9" />
 
+                        <CheckBox
+                                fx:id="chkDeteccionTermica"
+                                text="Deteccion termica" />
 
-                <Label
-                        styleClass="etiqueta-campo"
-                        text="Peso (kg)" />
+                    </VBox>
 
-                <TextField
-                        fx:id="txtPeso"
-                        promptText="Ej: 0.9" />
+                    <!-- ===================== -->
+                    <!-- OPERACIONES CRUD      -->
+                    <!-- ===================== -->
 
+                    <VBox
+                            spacing="10"
+                            styleClass="tarjeta">
 
-                <CheckBox
-                        fx:id="chkDeteccionTermica"
-                        text="Deteccion termica" />
+                        <Label
+                                styleClass="titulo-seccion"
+                                text="OPERACIONES" />
 
-            </VBox>
+                        <GridPane
+                                hgap="8"
+                                vgap="8">
 
+                            <columnConstraints>
 
-            <!-- ===================== -->
-            <!-- CRUD                  -->
-            <!-- ===================== -->
+                                <ColumnConstraints percentWidth="50" />
 
-            <VBox
-                    spacing="10"
-                    styleClass="tarjeta">
+                                <ColumnConstraints percentWidth="50" />
 
-                <Label
-                        styleClass="titulo-seccion"
-                        text="OPERACIONES" />
+                            </columnConstraints>
 
-                <GridPane
-                        hgap="8"
-                        vgap="8">
+                            <Button
+                                    maxWidth="Infinity"
+                                    onAction="#crearDrone"
+                                    styleClass="boton,boton-primario"
+                                    text="Crear"
+                                    GridPane.columnIndex="0"
+                                    GridPane.rowIndex="0" />
 
-                    <columnConstraints>
+                            <Button
+                                    maxWidth="Infinity"
+                                    onAction="#modificarDrone"
+                                    styleClass="boton,boton-secundario"
+                                    text="Modificar"
+                                    GridPane.columnIndex="1"
+                                    GridPane.rowIndex="0" />
 
-                        <ColumnConstraints
-                                percentWidth="50" />
+                            <Button
+                                    maxWidth="Infinity"
+                                    onAction="#eliminarDrone"
+                                    styleClass="boton,boton-peligro"
+                                    text="Eliminar"
+                                    GridPane.columnIndex="0"
+                                    GridPane.rowIndex="1" />
 
-                        <ColumnConstraints
-                                percentWidth="50" />
+                            <Button
+                                    maxWidth="Infinity"
+                                    onAction="#limpiarFormulario"
+                                    styleClass="boton,boton-neutro"
+                                    text="Limpiar"
+                                    GridPane.columnIndex="1"
+                                    GridPane.rowIndex="1" />
 
-                    </columnConstraints>
+                        </GridPane>
 
+                    </VBox>
 
-                    <Button
+                    <!-- ===================== -->
+                    <!-- BUSCAR DRONES         -->
+                    <!-- ===================== -->
+
+                    <VBox
+                            spacing="8"
+                            styleClass="tarjeta">
+
+                        <Label
+                                styleClass="titulo-seccion"
+                                text="BUSCAR POR ID" />
+
+                        <TextField
+                                fx:id="txtBuscarId"
+                                promptText="ID del drone" />
+
+                        <Button
+                                maxWidth="Infinity"
+                                onAction="#buscarDrone"
+                                styleClass="boton,boton-secundario"
+                                text="Buscar" />
+
+                        <Button
+                                maxWidth="Infinity"
+                                onAction="#listarDrones"
+                                styleClass="boton,boton-neutro"
+                                text="Listar todos" />
+
+                    </VBox>
+
+                    <!-- ===================== -->
+                    <!-- MENSAJES              -->
+                    <!-- ===================== -->
+
+                    <Label
+                            fx:id="lblMensaje"
                             maxWidth="Infinity"
-                            onAction="#crearDrone"
-                            styleClass="boton,boton-primario"
-                            text="Crear"
-                            GridPane.columnIndex="0"
-                            GridPane.rowIndex="0" />
+                            wrapText="true" />
 
-                    <Button
-                            maxWidth="Infinity"
-                            onAction="#modificarDrone"
-                            styleClass="boton,boton-secundario"
-                            text="Modificar"
-                            GridPane.columnIndex="1"
-                            GridPane.rowIndex="0" />
+                </VBox>
 
-                    <Button
-                            maxWidth="Infinity"
-                            onAction="#eliminarDrone"
-                            styleClass="boton,boton-peligro"
-                            text="Eliminar"
-                            GridPane.columnIndex="0"
-                            GridPane.rowIndex="1" />
+            </content>
 
-                    <Button
-                            maxWidth="Infinity"
-                            onAction="#limpiarFormulario"
-                            styleClass="boton,boton-neutro"
-                            text="Limpiar"
-                            GridPane.columnIndex="1"
-                            GridPane.rowIndex="1" />
-
-                </GridPane>
-
-            </VBox>
-
-
-            <!-- ===================== -->
-            <!-- BUSQUEDA              -->
-            <!-- ===================== -->
-
-            <VBox
-                    spacing="8"
-                    styleClass="tarjeta">
-
-                <Label
-                        styleClass="titulo-seccion"
-                        text="BUSCAR POR ID" />
-
-                <TextField
-                        fx:id="txtBuscarId"
-                        promptText="ID del drone" />
-
-                <Button
-                        maxWidth="Infinity"
-                        onAction="#buscarDrone"
-                        styleClass="boton,boton-secundario"
-                        text="Buscar" />
-
-                <Button
-                        maxWidth="Infinity"
-                        onAction="#listarDrones"
-                        styleClass="boton,boton-neutro"
-                        text="Listar todos" />
-
-            </VBox>
-
-
-            <Label
-                    fx:id="lblMensaje"
-                    wrapText="true" />
-
-        </VBox>
+        </ScrollPane>
 
     </left>
 
-
     <!-- ============================= -->
-    <!-- TABLA                         -->
+    <!-- TABLA DE DRONES               -->
     <!-- ============================= -->
 
     <center>
@@ -230,20 +242,16 @@
                 styleClass="tarjeta">
 
             <BorderPane.margin>
-
                 <Insets
                         top="16"
                         right="16"
                         bottom="16"
                         left="0" />
-
             </BorderPane.margin>
-
 
             <Label
                     styleClass="titulo-seccion"
                     text="DRONES REGISTRADOS" />
-
 
             <TableView
                     fx:id="tablaDrones"
@@ -287,7 +295,6 @@
                             text="Deteccion termica" />
 
                 </columns>
-
 
                 <placeholder>
 
