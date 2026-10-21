@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Pestana de clima: suscripcion de drones a ciudades (patron Observer)
+  y consulta de las APIs de Open-Meteo.
+  Autores: Alejandra Cano y Juan Rosero
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane
+        xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        fx:controller="co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlClima">
+
+    <!-- ============================= -->
+    <!-- SUSCRIPCION Y CONSULTA        -->
+    <!-- ============================= -->
+
+    <left>
+
+        <VBox
+                prefWidth="330"
+                spacing="15">
+
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16" />
+            </padding>
+
+            <VBox
+                    spacing="9"
+                    styleClass="tarjeta">
+
+                <Label
+                        styleClass="titulo-seccion"
+                        text="SUSCRIPCION AL CLIMA" />
+
+                <Label
+                        styleClass="etiqueta-campo"
+                        text="Drone" />
+
+                <ComboBox
+                        fx:id="cmbDrone"
+                        maxWidth="Infinity"
+                        promptText="Seleccione un drone" />
+
+                <Label
+                        styleClass="etiqueta-campo"
+                        text="Ciudad" />
+
+                <ComboBox
+                        fx:id="cmbCiudad"
+                        maxWidth="Infinity"
+                        promptText="Seleccione una ciudad" />
+
+                <GridPane
+                        hgap="8"
+                        vgap="8">
+
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50" />
+                        <ColumnConstraints percentWidth="50" />
+                    </columnConstraints>
+
+                    <Button
+                            maxWidth="Infinity"
+                            onAction="#suscribir"
+                            styleClass="boton,boton-primario"
+                            text="Suscribir"
+                            GridPane.columnIndex="0"
+                            GridPane.rowIndex="0" />
+
+                    <Button
+                            maxWidth="Infinity"
+                            onAction="#desuscribir"
+                            styleClass="boton,boton-peligro"
+                            text="Desuscribir"
+                            GridPane.columnIndex="1"
+                            GridPane.rowIndex="0" />
+
+                </GridPane>
+
+            </VBox>
+
+            <VBox
+                    spacing="9"
+                    styleClass="tarjeta">
+
+                <Label
+                        styleClass="titulo-seccion"
+                        text="NOTIFICACION" />
+
+                <Label
+                        styleClass="etiqueta-campo"
+                        text="Consulta las APIs y notifica a los drones suscritos."
+                        wrapText="true" />
+
+                <HBox
+                        alignment="CENTER_LEFT"
+                        spacing="10">
+
+                    <Button
+                            fx:id="btnConsultar"
+                            maxWidth="Infinity"
+                            HBox.hgrow="ALWAYS"
+                            onAction="#consultarClima"
+                            styleClass="boton,boton-secundario"
+                            text="Consultar clima" />
+
+                    <ProgressIndicator
+                            fx:id="indicadorCarga"
+                            prefHeight="24"
+                            prefWidth="24"
+                            visible="false" />
+
+                </HBox>
+
+            </VBox>
+
+            <Label
+                    fx:id="lblMensaje"
+                    wrapText="true" />
+
+        </VBox>
+
+    </left>
+
+    <!-- ============================= -->
+    <!-- TABLA DE NOTIFICACIONES       -->
+    <!-- ============================= -->
+
+    <center>
+
+        <VBox
+                spacing="10"
+                styleClass="tarjeta">
+
+            <BorderPane.margin>
+                <Insets top="16" right="16" bottom="16" left="0" />
+            </BorderPane.margin>
+
+            <Label
+                    styleClass="titulo-seccion"
+                    text="DRONES SUSCRITOS Y CLIMA NOTIFICADO" />
+
+            <TableView
+                    fx:id="tablaSuscripciones"
+                    VBox.vgrow="ALWAYS">
+
+                <columns>
+                    <TableColumn fx:id="colId" prefWidth="45" text="ID" />
+                    <TableColumn fx:id="colSerial" prefWidth="95" text="Serial" />
+                    <TableColumn fx:id="colCiudad" prefWidth="150" text="Ciudad" />
+                    <TableColumn fx:id="colTemperatura" prefWidth="90" text="Temp." />
+                    <TableColumn fx:id="colHumedad" prefWidth="80" text="Humedad" />
+                    <TableColumn fx:id="colViento" prefWidth="90" text="Viento" />
+                    <TableColumn fx:id="colPresion" prefWidth="95" text="Presion" />
+                    <TableColumn fx:id="colVisibilidad" prefWidth="90" text="Visibilidad" />
+                </columns>
+
+                <placeholder>
+                    <Label text="No hay drones suscritos." />
+                </placeholder>
+
+            </TableView>
+
+        </VBox>
+
+    </center>
+
+</BorderPane>

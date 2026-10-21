@@ -2,14 +2,25 @@ package co.edu.poli.sw2.ProyectoHexa.dominio.modelo;
 
 import java.io.Serializable;
 
+import co.edu.poli.sw2.ProyectoHexa.dominio.clima.Weather;
+import co.edu.poli.sw2.ProyectoHexa.dominio.clima.WeatherObserver;
+
 /**
  * Entidad abstracta que representa un dron dentro del dominio.
  * Contiene los atributos comunes compartidos por los diferentes
  * tipos de drones.
  *
+ * <p>
+ * Cumple el rol de <b>observador</b> en el patron Observer: al
+ * suscribirse al notificador de una ciudad, recibe automaticamente
+ * cada actualizacion del clima mediante {@link #actualizarClima(Weather)}.
+ * El ultimo clima recibido se conserva solo en memoria; no se guarda
+ * en la base de datos.
+ * </p>
+ *
  * @author Alejandra Cano y Juan Rosero
  */
-public abstract class Drone implements Serializable {
+public abstract class Drone implements Serializable, WeatherObserver {
 
     private static final long serialVersionUID = 3L;
 
@@ -18,6 +29,9 @@ public abstract class Drone implements Serializable {
     private String fabricante;
     private String modelo;
     private double peso;
+
+    /** Ultimo clima notificado. Es transitorio: no se persiste. */
+    private transient Weather climaActual;
 
     /**
      * Construye un dron con sus datos generales.
@@ -133,4 +147,57 @@ public abstract class Drone implements Serializable {
      * @return nombre del tipo de dron
      */
     public abstract String getTipo();
+    /**
+     * Recibe la notificacion del clima de la ciudad a la que el dron
+     * esta suscrito y la guarda como su clima actual.
+     *
+     * @param clima condiciones climaticas notificadas
+     */
+    @Override
+    public void actualizarClima(Weather clima) {
+        this.climaActual = clima;
+    }
+
+    /**
+     * Obtiene el ultimo clima recibido.
+     *
+     * @return clima actual, o {@code null} si aun no ha recibido ninguno
+     */
+    public Weather getClimaActual() {
+        return climaActual;
+    }
+
+    /**
+     * Dos drones son iguales si son del mismo tipo y tienen el mismo id.
+     *
+     * <p>
+     * Cada consulta a la base de datos crea objetos nuevos; comparar por
+     * id permite reconocer al mismo dron al suscribirlo o desuscribirlo.
+     * Los drones sin guardar (id 0) solo son iguales a si mismos.
+     * </p>
+     *
+     * @param otro objeto a comparar
+     * @return {@code true} si representan el mismo dron
+     */
+    @Override
+    public boolean equals(Object otro) {
+        if (this == otro) {
+            return true;
+        }
+        if (otro == null || getClass() != otro.getClass() || id == 0) {
+            return false;
+        }
+        return id == ((Drone) otro).id;
+    }
+
+    /**
+     * Calcula el hash a partir del tipo y el id, coherente con
+     * {@link #equals(Object)}.
+     *
+     * @return codigo hash
+     */
+    @Override
+    public int hashCode() {
+        return id == 0 ? System.identityHashCode(this) : 31 * getClass().hashCode() + id;
+    }
 }

@@ -8,6 +8,7 @@ import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.CrearDroneUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.EliminarDroneUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ListarDronesUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ModificarDroneUseCase;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.SuscripcionClimaUseCase;
 import co.edu.poli.sw2.ProyectoHexa.dominio.excepcion.DronException;
 import co.edu.poli.sw2.ProyectoHexa.dominio.modelo.Drone;
 import co.edu.poli.sw2.ProyectoHexa.dominio.modelo.Vigilancia;
@@ -158,6 +159,12 @@ public class ControlDrone implements Initializable {
     private final ListarDronesUseCase listarDronesUseCase;
 
     /**
+     * Caso de uso de suscripciones al clima. Se usa para mantener las
+     * suscripciones al dia cuando un dron se modifica o se elimina.
+     */
+    private final SuscripcionClimaUseCase suscripcionClimaUseCase;
+
+    /**
      * Dron seleccionado actualmente en la tabla.
      */
     private Drone droneSeleccionado;
@@ -171,19 +178,22 @@ public class ControlDrone implements Initializable {
      * @param eliminarDroneUseCase caso de uso de eliminacion
      * @param buscarDroneUseCase caso de uso de busqueda
      * @param listarDronesUseCase caso de uso de listado
+     * @param suscripcionClimaUseCase caso de uso de suscripciones al clima
      */
     public ControlDrone(
             CrearDroneUseCase crearDroneUseCase,
             ModificarDroneUseCase modificarDroneUseCase,
             EliminarDroneUseCase eliminarDroneUseCase,
             BuscarDroneUseCase buscarDroneUseCase,
-            ListarDronesUseCase listarDronesUseCase) {
+            ListarDronesUseCase listarDronesUseCase,
+            SuscripcionClimaUseCase suscripcionClimaUseCase) {
 
         this.crearDroneUseCase = crearDroneUseCase;
         this.modificarDroneUseCase = modificarDroneUseCase;
         this.eliminarDroneUseCase = eliminarDroneUseCase;
         this.buscarDroneUseCase = buscarDroneUseCase;
         this.listarDronesUseCase = listarDronesUseCase;
+        this.suscripcionClimaUseCase = suscripcionClimaUseCase;
     }
 
     /**
@@ -301,13 +311,16 @@ public class ControlDrone implements Initializable {
                 return;
             }
 
-            modificarDroneUseCase.modificar(
+            Drone modificado = modificarDroneUseCase.modificar(
                     droneSeleccionado,
                     txtSerial.getText(),
                     txtFabricante.getText(),
                     txtModelo.getText(),
                     txtPeso.getText(),
                     chkDeteccionTermica.isSelected());
+
+            // Si el dron estaba suscrito al clima, se actualizan sus datos.
+            suscripcionClimaUseCase.sincronizar(modificado);
 
             listarDrones();
             limpiarFormulario();
@@ -346,6 +359,9 @@ public class ControlDrone implements Initializable {
 
             eliminarDroneUseCase.eliminar(
                     droneSeleccionado);
+
+            // Un dron eliminado deja de recibir notificaciones del clima.
+            suscripcionClimaUseCase.retirar(droneSeleccionado);
 
             listarDrones();
             limpiarFormulario();

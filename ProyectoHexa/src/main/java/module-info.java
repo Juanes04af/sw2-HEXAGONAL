@@ -12,6 +12,12 @@ module co.edu.poli.sw2 {
     requires org.postgresql.jdbc;
 
     /*
+     * Cliente HTTP de Java para las APIs
+     * de Open-Meteo.
+     */
+    requires java.net.http;
+
+    /*
      * JavaFX necesita acceso reflexivo al
      * adaptador de entrada.
      */

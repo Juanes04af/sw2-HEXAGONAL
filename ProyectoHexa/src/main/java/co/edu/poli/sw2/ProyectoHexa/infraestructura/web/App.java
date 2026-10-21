@@ -13,7 +13,16 @@ import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.CrearDroneServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.EliminarDroneServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.ListarDronesServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.ModificarDroneServicio;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.GetWeatherByCityUseCase;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.salida.WeatherProvider;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.GetWeatherByCityServicio;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.WeatherNotificationService;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.GeoApiAdapter;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.GeoApiClient;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.OpenWeatherAdapter;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.OpenWeatherClient;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.persistencia.PostgresDroneRepository;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlClima;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlDrone;
 
 import javafx.application.Application;
@@ -76,6 +85,24 @@ public class App extends Application {
                         droneRepository);
 
         /*
+         * Clima (patron Observer): adaptador de salida hacia las
+         * APIs de Open-Meteo, caso de uso de consulta y servicio que
+         * administra un notificador por ciudad.
+         */
+        WeatherProvider weatherProvider =
+                new OpenWeatherAdapter(
+                        new GeoApiAdapter(new GeoApiClient()),
+                        new OpenWeatherClient());
+
+        GetWeatherByCityUseCase getWeatherByCity =
+                new GetWeatherByCityServicio(
+                        weatherProvider);
+
+        WeatherNotificationService notificacionClima =
+                new WeatherNotificationService(
+                        getWeatherByCity);
+
+        /*
          * CARGADOR FXML
          */
         FXMLLoader loader =
@@ -98,6 +125,16 @@ public class App extends Application {
                                 modificarDrone,
                                 eliminarDrone,
                                 buscarDrone,
+                                listarDrones,
+                                notificacionClima);
+                    }
+
+                    if (controllerClass
+                            == ControlClima.class) {
+
+                        return new ControlClima(
+                                notificacionClima,
+                                notificacionClima,
                                 listarDrones);
                     }
 
@@ -121,8 +158,8 @@ public class App extends Application {
         Scene scene =
                 new Scene(
                         root,
-                        1050,
-                        680);
+                        1100,
+                        720);
 
         stage.setTitle(
                 "Gestion de Drones - Arquitectura Hexagonal");
