@@ -132,7 +132,6 @@ class ValidadorDroneTest {
         assertThrows(DronValidacionException.class,
                 () -> ValidadorDrone.parsearPeso(texto));
     }
-
     // ---------------- Estructura ----------------
 
     @Test
