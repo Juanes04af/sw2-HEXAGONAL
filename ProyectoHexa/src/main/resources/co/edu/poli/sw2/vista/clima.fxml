@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  Pestana de clima: suscripcion de drones a ciudades (patron Observer)
-  y consulta de las APIs de Open-Meteo.
+  Pestana de clima: suscripcion de drones a ciudades (Observer), consulta de
+  las APIs de Open-Meteo y columna "Puede volar" (Chain of Responsibility).
   Autores: Alejandra Cano y Juan Rosero
 -->
 
@@ -24,159 +24,87 @@
         xmlns:fx="http://javafx.com/fxml"
         fx:controller="co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlClima">
 
-    <!-- ============================= -->
-    <!-- SUSCRIPCION Y CONSULTA        -->
-    <!-- ============================= -->
-
+    <!-- SUSCRIPCION Y CONSULTA -->
     <left>
-
-        <VBox
-                prefWidth="330"
-                spacing="15">
-
+    
+        <VBox prefWidth="330" spacing="15">
             <padding>
                 <Insets top="16" right="16" bottom="16" left="16" />
             </padding>
 
-            <VBox
-                    spacing="9"
-                    styleClass="tarjeta">
+            <VBox spacing="9" styleClass="tarjeta">
+                <Label styleClass="titulo-seccion" text="SUSCRIPCION AL CLIMA" />
+                <Label styleClass="etiqueta-campo" text="Drone" />
+                <ComboBox fx:id="cmbDrone" maxWidth="Infinity" promptText="Seleccione un drone" />
+                <Label styleClass="etiqueta-campo" text="Ciudad" />
+                <ComboBox fx:id="cmbCiudad" maxWidth="Infinity" promptText="Seleccione una ciudad" />
 
-                <Label
-                        styleClass="titulo-seccion"
-                        text="SUSCRIPCION AL CLIMA" />
-
-                <Label
-                        styleClass="etiqueta-campo"
-                        text="Drone" />
-
-                <ComboBox
-                        fx:id="cmbDrone"
-                        maxWidth="Infinity"
-                        promptText="Seleccione un drone" />
-
-                <Label
-                        styleClass="etiqueta-campo"
-                        text="Ciudad" />
-
-                <ComboBox
-                        fx:id="cmbCiudad"
-                        maxWidth="Infinity"
-                        promptText="Seleccione una ciudad" />
-
-                <GridPane
-                        hgap="8"
-                        vgap="8">
-
+                <GridPane hgap="8" vgap="8">
                     <columnConstraints>
                         <ColumnConstraints percentWidth="50" />
                         <ColumnConstraints percentWidth="50" />
                     </columnConstraints>
-
-                    <Button
-                            maxWidth="Infinity"
-                            onAction="#suscribir"
-                            styleClass="boton,boton-primario"
-                            text="Suscribir"
-                            GridPane.columnIndex="0"
-                            GridPane.rowIndex="0" />
-
-                    <Button
-                            maxWidth="Infinity"
-                            onAction="#desuscribir"
-                            styleClass="boton,boton-peligro"
-                            text="Desuscribir"
-                            GridPane.columnIndex="1"
-                            GridPane.rowIndex="0" />
-
+                    <Button maxWidth="Infinity" onAction="#suscribir"
+                            styleClass="boton,boton-primario" text="Suscribir"
+                            GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <Button maxWidth="Infinity" onAction="#desuscribir"
+                            styleClass="boton,boton-peligro" text="Desuscribir"
+                            GridPane.columnIndex="1" GridPane.rowIndex="0" />
                 </GridPane>
-
             </VBox>
 
-            <VBox
-                    spacing="9"
-                    styleClass="tarjeta">
+            <VBox spacing="9" styleClass="tarjeta">
+                <Label styleClass="titulo-seccion" text="NOTIFICACION" />
+                <Label styleClass="etiqueta-campo" wrapText="true"
+                       text="Consulta las APIs, notifica a los drones suscritos y valida si pueden volar." />
 
-                <Label
-                        styleClass="titulo-seccion"
-                        text="NOTIFICACION" />
-
-                <Label
-                        styleClass="etiqueta-campo"
-                        text="Consulta las APIs y notifica a los drones suscritos."
-                        wrapText="true" />
-
-                <HBox
-                        alignment="CENTER_LEFT"
-                        spacing="10">
-
-                    <Button
-                            fx:id="btnConsultar"
-                            maxWidth="Infinity"
-                            HBox.hgrow="ALWAYS"
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Button fx:id="btnConsultar" maxWidth="Infinity" HBox.hgrow="ALWAYS"
                             onAction="#consultarClima"
-                            styleClass="boton,boton-secundario"
-                            text="Consultar clima" />
-
-                    <ProgressIndicator
-                            fx:id="indicadorCarga"
-                            prefHeight="24"
-                            prefWidth="24"
-                            visible="false" />
-
+                            styleClass="boton,boton-secundario" text="Consultar clima" />
+                    <ProgressIndicator fx:id="indicadorCarga" prefHeight="24" prefWidth="24"
+                                       visible="false" />
                 </HBox>
-
             </VBox>
 
-            <Label
-                    fx:id="lblMensaje"
-                    wrapText="true" />
-
+            <Label fx:id="lblMensaje" wrapText="true" />
         </VBox>
-
     </left>
 
-    <!-- ============================= -->
-    <!-- TABLA DE NOTIFICACIONES       -->
-    <!-- ============================= -->
-
+    <!-- TABLA DE CLIMA -->
     <center>
-
-        <VBox
-                spacing="10"
-                styleClass="tarjeta">
-
+        <VBox spacing="10" styleClass="tarjeta">
             <BorderPane.margin>
                 <Insets top="16" right="16" bottom="16" left="0" />
             </BorderPane.margin>
 
-            <Label
-                    styleClass="titulo-seccion"
-                    text="DRONES SUSCRITOS Y CLIMA NOTIFICADO" />
+            <Label styleClass="titulo-seccion" text="CLIMA DE LOS DRONES SUSCRITOS" />
 
-            <TableView
-                    fx:id="tablaSuscripciones"
-                    VBox.vgrow="ALWAYS">
+            <TableView fx:id="tablaSuscripciones" VBox.vgrow="ALWAYS">
+
+                <!-- Ajusta las 10 columnas al ancho disponible -->
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                </columnResizePolicy>
 
                 <columns>
-                    <TableColumn fx:id="colId" prefWidth="45" text="ID" />
-                    <TableColumn fx:id="colSerial" prefWidth="95" text="Serial" />
-                    <TableColumn fx:id="colCiudad" prefWidth="150" text="Ciudad" />
-                    <TableColumn fx:id="colTemperatura" prefWidth="90" text="Temp." />
-                    <TableColumn fx:id="colHumedad" prefWidth="80" text="Humedad" />
-                    <TableColumn fx:id="colViento" prefWidth="90" text="Viento" />
-                    <TableColumn fx:id="colPresion" prefWidth="95" text="Presion" />
-                    <TableColumn fx:id="colVisibilidad" prefWidth="90" text="Visibilidad" />
+                    <TableColumn fx:id="colId" prefWidth="40" text="ID" />
+                    <TableColumn fx:id="colSerial" prefWidth="80" text="Serial" />
+                    <TableColumn fx:id="colCiudad" prefWidth="130" text="Ciudad" />
+                    <TableColumn fx:id="colTemperatura" prefWidth="70" text="Temp." />
+                    <TableColumn fx:id="colHumedad" prefWidth="70" text="Humedad" />
+                    <TableColumn fx:id="colViento" prefWidth="80" text="Viento" />
+                    <TableColumn fx:id="colPresion" prefWidth="85" text="Presion" />
+                    <TableColumn fx:id="colVisibilidad" prefWidth="80" text="Visibilidad" />
+                    <TableColumn fx:id="colPuedeVolar" prefWidth="80" text="Puede volar" />
+                    <TableColumn fx:id="colMotivo" prefWidth="250" text="Motivo del rechazo" />
                 </columns>
 
                 <placeholder>
                     <Label text="No hay drones suscritos." />
                 </placeholder>
-
             </TableView>
-
         </VBox>
-
     </center>
 
 </BorderPane>

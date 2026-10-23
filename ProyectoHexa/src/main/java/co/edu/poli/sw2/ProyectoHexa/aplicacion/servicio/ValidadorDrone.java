@@ -83,6 +83,12 @@ public final class ValidadorDrone {
             double peso = Double.parseDouble(
                     pesoTexto.trim().replace(",", "."));
 
+            // NaN e Infinity se parsean sin error, hay que rechazarlos aparte
+            if (Double.isNaN(peso) || Double.isInfinite(peso)) {
+                throw new DronValidacionException(
+                        "El peso debe ser un numero valido.");
+            }
+
             if (peso <= 0) {
                 throw new DronValidacionException(
                         "El peso debe ser mayor que cero.");

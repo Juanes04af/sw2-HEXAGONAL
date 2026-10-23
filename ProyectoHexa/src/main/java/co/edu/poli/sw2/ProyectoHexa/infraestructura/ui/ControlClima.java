@@ -1,6 +1,7 @@
 package co.edu.poli.sw2.ProyectoHexa.infraestructura.ui;
 
 import java.net.URL;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -12,6 +13,8 @@ import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.NotificarClimaUseC
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ResultadoNotificacion;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.Suscripcion;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.SuscripcionClimaUseCase;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ValidarClimaUseCase;
+import co.edu.poli.sw2.ProyectoHexa.dominio.chain.EvaluacionClima;
 import co.edu.poli.sw2.ProyectoHexa.dominio.clima.Ciudad;
 import co.edu.poli.sw2.ProyectoHexa.dominio.clima.Weather;
 import co.edu.poli.sw2.ProyectoHexa.dominio.excepcion.DronException;
@@ -34,15 +37,14 @@ import javafx.util.StringConverter;
  * Adaptador de entrada JavaFX de la pestana Clima.
  *
  * <p>
- * Permite suscribir o dar de baja drones en el notificador del clima
- * de una ciudad y ejecutar la consulta a las APIs externas. Al
- * terminar la consulta, la tabla muestra el clima que cada dron
- * recibio en su notificacion.
+ * Permite suscribir o dar de baja drones en el notificador del clima de
+ * una ciudad (Observer) y consultar las APIs externas. Al terminar, la
+ * tabla muestra el clima notificado a cada dron y si ese clima le
+ * permite volar, segun la cadena de responsabilidad (Chain).
  * </p>
  *
  * <p>
- * La consulta se ejecuta en un hilo de fondo para no congelar la
- * ventana mientras se espera la respuesta de internet.
+ * La consulta se ejecuta en un hilo de fondo para no congelar la ventana.
  * </p>
  *
  * @author Alejandra Cano y Juan Rosero
@@ -53,60 +55,37 @@ public class ControlClima implements Initializable {
     private static final String SIN_DATO = "-";
 
     /** Selector del dron. */
-    @FXML
-    private ComboBox<Drone> cmbDrone;
+    @FXML private ComboBox<Drone> cmbDrone;
 
     /** Selector de la ciudad. */
-    @FXML
-    private ComboBox<Ciudad> cmbCiudad;
+    @FXML private ComboBox<Ciudad> cmbCiudad;
 
     /** Boton que dispara la consulta y la notificacion. */
-    @FXML
-    private Button btnConsultar;
+    @FXML private Button btnConsultar;
 
     /** Indicador visible mientras se consulta la API. */
-    @FXML
-    private ProgressIndicator indicadorCarga;
+    @FXML private ProgressIndicator indicadorCarga;
 
     /** Etiqueta de mensajes al usuario. */
-    @FXML
-    private Label lblMensaje;
+    @FXML private Label lblMensaje;
 
     /** Tabla de drones suscritos y su clima. */
-    @FXML
-    private TableView<Suscripcion> tablaSuscripciones;
+    @FXML private TableView<Suscripcion> tablaSuscripciones;
 
-    /** Columna del id del dron. */
-    @FXML
-    private TableColumn<Suscripcion, String> colId;
+    @FXML private TableColumn<Suscripcion, String> colId;
+    @FXML private TableColumn<Suscripcion, String> colSerial;
+    @FXML private TableColumn<Suscripcion, String> colCiudad;
+    @FXML private TableColumn<Suscripcion, String> colTemperatura;
+    @FXML private TableColumn<Suscripcion, String> colHumedad;
+    @FXML private TableColumn<Suscripcion, String> colViento;
+    @FXML private TableColumn<Suscripcion, String> colPresion;
+    @FXML private TableColumn<Suscripcion, String> colVisibilidad;
 
-    /** Columna del serial del dron. */
-    @FXML
-    private TableColumn<Suscripcion, String> colSerial;
+    /** Columna nueva: indica si el clima notificado permite volar (Si/No). */
+    @FXML private TableColumn<Suscripcion, String> colPuedeVolar;
 
-    /** Columna de la ciudad suscrita. */
-    @FXML
-    private TableColumn<Suscripcion, String> colCiudad;
-
-    /** Columna de la temperatura. */
-    @FXML
-    private TableColumn<Suscripcion, String> colTemperatura;
-
-    /** Columna de la humedad. */
-    @FXML
-    private TableColumn<Suscripcion, String> colHumedad;
-
-    /** Columna de la velocidad del viento. */
-    @FXML
-    private TableColumn<Suscripcion, String> colViento;
-
-    /** Columna de la presion atmosferica. */
-    @FXML
-    private TableColumn<Suscripcion, String> colPresion;
-
-    /** Columna de la visibilidad. */
-    @FXML
-    private TableColumn<Suscripcion, String> colVisibilidad;
+    /** Columna nueva: regla incumplida cuando no puede volar. */
+    @FXML private TableColumn<Suscripcion, String> colMotivo;
 
     /** Caso de uso para suscribir y desuscribir drones. */
     private final SuscripcionClimaUseCase suscripcionClima;
@@ -117,19 +96,31 @@ public class ControlClima implements Initializable {
     /** Caso de uso para listar los drones registrados. */
     private final ListarDronesUseCase listarDrones;
 
+    /** Caso de uso que valida el clima con la cadena de responsabilidad. */
+    private final ValidarClimaUseCase validarClima;
+
+    /**
+     * Evaluaciones ya calculadas, por instancia de clima. Evita validar
+     * (y registrar en el log) lo mismo cada vez que la tabla se repinta.
+     */
+    private final Map<Weather, EvaluacionClima> evaluaciones = new IdentityHashMap<>();
+
     /**
      * Construye el controlador con los casos de uso que necesita.
      *
      * @param suscripcionClima caso de uso de suscripciones
      * @param notificarClima   caso de uso de notificacion
      * @param listarDrones     caso de uso de listado de drones
+     * @param validarClima     caso de uso de validacion de vuelo
      */
     public ControlClima(SuscripcionClimaUseCase suscripcionClima,
                         NotificarClimaUseCase notificarClima,
-                        ListarDronesUseCase listarDrones) {
+                        ListarDronesUseCase listarDrones,
+                        ValidarClimaUseCase validarClima) {
         this.suscripcionClima = suscripcionClima;
         this.notificarClima = notificarClima;
         this.listarDrones = listarDrones;
+        this.validarClima = validarClima;
     }
 
     /**
@@ -143,8 +134,7 @@ public class ControlClima implements Initializable {
         cmbCiudad.setItems(FXCollections.observableArrayList(Ciudad.values()));
         cmbDrone.setConverter(new ConvertidorDrone());
 
-        // La lista de drones se recarga cada vez que se abre el selector,
-        // asi aparecen los drones creados en la pestana Drones.
+        // La lista de drones se recarga cada vez que se abre el selector.
         cmbDrone.setOnShowing(evento -> cargarDrones());
 
         // Al elegir un dron, se muestra la ciudad a la que ya esta suscrito.
@@ -169,8 +159,8 @@ public class ControlClima implements Initializable {
     }
 
     /**
-     * Configura las columnas de la tabla con el clima notificado a
-     * cada dron.
+     * Configura las columnas: los cinco datos del clima, mas "Puede volar"
+     * y el motivo del rechazo.
      */
     private void configurarTabla() {
         colId.setCellValueFactory(d ->
@@ -190,11 +180,18 @@ public class ControlClima implements Initializable {
                 celdaClima(d.getValue(), c -> formato("%.1f hPa", c.getPresion())));
         colVisibilidad.setCellValueFactory(d ->
                 celdaClima(d.getValue(), c -> formato("%.1f km", c.getVisibilidad())));
+
+        // Resultado de la cadena de responsabilidad sobre el clima del dron.
+        colPuedeVolar.setCellValueFactory(d ->
+                celdaClima(d.getValue(), c -> evaluar(c).isApto() ? "Si" : "No"));
+        colMotivo.setCellValueFactory(d ->
+                celdaClima(d.getValue(), c -> {
+                    EvaluacionClima evaluacion = evaluar(c);
+                    return evaluacion.isApto() ? SIN_DATO : evaluacion.getMotivo();
+                }));
     }
 
-    /**
-     * Suscribe el dron seleccionado a la ciudad seleccionada.
-     */
+    /** Suscribe el dron seleccionado a la ciudad seleccionada. */
     @FXML
     private void suscribir() {
         try {
@@ -213,9 +210,7 @@ public class ControlClima implements Initializable {
         }
     }
 
-    /**
-     * Da de baja el dron seleccionado de su ciudad.
-     */
+    /** Da de baja el dron seleccionado de su ciudad. */
     @FXML
     private void desuscribir() {
         try {
@@ -230,8 +225,8 @@ public class ControlClima implements Initializable {
     }
 
     /**
-     * Consulta el clima de las ciudades con drones suscritos y
-     * notifica a cada uno. Se ejecuta en un hilo de fondo.
+     * Consulta el clima de las ciudades con drones suscritos y notifica a
+     * cada uno. Se ejecuta en un hilo de fondo.
      */
     @FXML
     private void consultarClima() {
@@ -249,6 +244,7 @@ public class ControlClima implements Initializable {
 
         tarea.setOnSucceeded(evento -> {
             terminarCarga();
+            evaluaciones.clear();            // llego clima nuevo: se evalua de nuevo
             refrescarTabla();
             mostrarResultado(tarea.getValue());
         });
@@ -270,32 +266,46 @@ public class ControlClima implements Initializable {
     }
 
     /**
-     * Resume en pantalla cuantas ciudades se notificaron y cuales
-     * fallaron.
+     * Informa, por ciudad, "CLIMA APTO..." o "CLIMA NO APTO..." con la
+     * regla incumplida, y los errores de consulta si los hubo.
      *
      * @param resultado resultado de la ronda de notificaciones
      */
     private void mostrarResultado(ResultadoNotificacion resultado) {
         StringBuilder texto = new StringBuilder();
-        int drones = suscripcionClima.listarSuscripciones().size();
+        boolean hayProblema = false;
 
-        texto.append("Clima notificado en ")
-             .append(resultado.getNotificadas().size())
-             .append(" ciudad(es) a ")
-             .append(drones)
-             .append(" drone(s).");
-
-        Map<Ciudad, String> errores = resultado.getErrores();
-        for (Map.Entry<Ciudad, String> error : errores.entrySet()) {
-            texto.append("\n").append(error.getKey()).append(": ").append(error.getValue());
+        for (Map.Entry<Ciudad, Weather> entrada : resultado.getNotificadas().entrySet()) {
+            EvaluacionClima evaluacion = evaluar(entrada.getValue());
+            if (texto.length() > 0) {
+                texto.append("\n");
+            }
+            texto.append(entrada.getKey()).append(": ").append(evaluacion.getMensaje());
+            hayProblema |= !evaluacion.isApto();
         }
 
-        mostrarMensaje(texto.toString(), !errores.isEmpty());
+        for (Map.Entry<Ciudad, String> error : resultado.getErrores().entrySet()) {
+            if (texto.length() > 0) {
+                texto.append("\n");
+            }
+            texto.append(error.getKey()).append(": ").append(error.getValue());
+            hayProblema = true;
+        }
+
+        mostrarMensaje(texto.toString(), hayProblema);
     }
 
     /**
-     * Recarga la lista de drones registrados, conservando la seleccion.
+     * Evalua un clima con la cadena, una sola vez por instancia.
+     *
+     * @param clima clima notificado
+     * @return evaluacion de la cadena de responsabilidad
      */
+    private EvaluacionClima evaluar(Weather clima) {
+        return evaluaciones.computeIfAbsent(clima, validarClima::validar);
+    }
+
+    /** Recarga la lista de drones registrados, conservando la seleccion. */
     private void cargarDrones() {
         try {
             Drone seleccionado = cmbDrone.getValue();
@@ -313,28 +323,24 @@ public class ControlClima implements Initializable {
         }
     }
 
-    /**
-     * Vuelve a cargar la tabla con las suscripciones actuales.
-     */
+    /** Vuelve a cargar la tabla con las suscripciones actuales. */
     private void refrescarTabla() {
         tablaSuscripciones.setItems(
                 FXCollections.observableArrayList(suscripcionClima.listarSuscripciones()));
         tablaSuscripciones.refresh();
     }
 
-    /**
-     * Restaura los controles al terminar la consulta.
-     */
+    /** Restaura los controles al terminar la consulta. */
     private void terminarCarga() {
         btnConsultar.setDisable(false);
         indicadorCarga.setVisible(false);
     }
 
     /**
-     * Construye el valor de una celda de clima.
+     * Construye el valor de una celda que depende del clima del dron.
      *
      * @param suscripcion fila de la tabla
-     * @param extractor   funcion que formatea el dato del clima
+     * @param extractor   funcion que obtiene el texto a partir del clima
      * @return texto de la celda, o "-" si el dron aun no tiene clima
      */
     private static SimpleStringProperty celdaClima(Suscripcion suscripcion,
@@ -366,28 +372,16 @@ public class ControlClima implements Initializable {
         lblMensaje.getStyleClass().add(error ? "mensaje-error" : "mensaje-ok");
     }
 
-    /**
-     * Muestra cada dron en el selector como "#id - serial".
-     */
+    /** Muestra cada dron en el selector como "#id - serial". */
     private static final class ConvertidorDrone extends StringConverter<Drone> {
 
-        /**
-         * Convierte el dron en el texto del selector.
-         *
-         * @param drone dron a mostrar
-         * @return texto visible
-         */
+        /** {@inheritDoc} */
         @Override
         public String toString(Drone drone) {
             return drone == null ? "" : "#" + drone.getId() + " - " + drone.getSerial();
         }
 
-        /**
-         * No se usa: el selector no es editable.
-         *
-         * @param texto texto ingresado
-         * @return siempre {@code null}
-         */
+        /** No se usa: el selector no es editable. */
         @Override
         public Drone fromString(String texto) {
             return null;

@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -67,6 +68,17 @@
                 <!-- ============================= -->
 
                 <left>
+                        <ScrollPane
+                fitToWidth="true"
+                fitToHeight="false"
+                hbarPolicy="NEVER"
+                vbarPolicy="AS_NEEDED"
+                pannable="true"
+                prefWidth="345.0"
+                minWidth="300.0"
+                maxWidth="345.0"
+                styleClass="scroll-formulario">
+
 
                     <VBox
                             prefWidth="330"
@@ -234,6 +246,7 @@
                                 wrapText="true" />
 
                     </VBox>
+                    </ScrollPane>
 
                 </left>
 

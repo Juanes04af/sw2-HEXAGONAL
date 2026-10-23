@@ -5,25 +5,27 @@ import java.io.IOException;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.BuscarDroneUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.CrearDroneUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.EliminarDroneUseCase;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.GetWeatherByCityUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ListarDronesUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ModificarDroneUseCase;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ValidarClimaUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.salida.DroneRepository;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.salida.WeatherProvider;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.BuscarDroneServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.CrearDroneServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.EliminarDroneServicio;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.GetWeatherByCityServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.ListarDronesServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.ModificarDroneServicio;
-import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.GetWeatherByCityUseCase;
-import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.salida.WeatherProvider;
-import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.GetWeatherByCityServicio;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.ValidarClimaServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.WeatherNotificationService;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.persistencia.PostgresDroneRepository;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlClima;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlDrone;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.GeoApiAdapter;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.GeoApiClient;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.OpenWeatherAdapter;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.OpenWeatherClient;
-import co.edu.poli.sw2.ProyectoHexa.infraestructura.persistencia.PostgresDroneRepository;
-import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlClima;
-import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlDrone;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -32,140 +34,71 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Punto de entrada principal de la aplicacion.
- *
- * <p>
- * Esta clase realiza el wiring de la arquitectura hexagonal.
- * Construye el adaptador de salida, los servicios de aplicacion
- * y finalmente el adaptador de entrada JavaFX.
- * </p>
+ * Punto de entrada principal. Realiza el wiring de la arquitectura
+ * hexagonal: adaptadores de salida, casos de uso y adaptadores de entrada.
  *
  * @author Alejandra Cano y Juan Rosero
  */
 public class App extends Application {
 
     /**
-     * Construye las dependencias de la aplicacion y carga
-     * la interfaz JavaFX.
+     * Construye las dependencias y carga la interfaz JavaFX.
      *
-     * @param stage escenario principal de JavaFX
-     * @throws IOException si no es posible cargar el archivo FXML
+     * @param stage escenario principal
+     * @throws IOException si no se puede cargar el FXML
      */
     @Override
-    public void start(Stage stage)
-            throws IOException {
+    public void start(Stage stage) throws IOException {
 
-        /*
-         * ADAPTADOR DE SALIDA
-         */
-        DroneRepository droneRepository =
-                new PostgresDroneRepository();
+        /* ADAPTADOR DE SALIDA: base de datos */
+        DroneRepository droneRepository = new PostgresDroneRepository();
 
-        /*
-         * SERVICIOS / CASOS DE USO
-         */
-        CrearDroneUseCase crearDrone =
-                new CrearDroneServicio(
-                        droneRepository);
+        /* CASOS DE USO DE DRONES */
+        CrearDroneUseCase crearDrone = new CrearDroneServicio(droneRepository);
+        ModificarDroneUseCase modificarDrone = new ModificarDroneServicio(droneRepository);
+        EliminarDroneUseCase eliminarDrone = new EliminarDroneServicio(droneRepository);
+        BuscarDroneUseCase buscarDrone = new BuscarDroneServicio(droneRepository);
+        ListarDronesUseCase listarDrones = new ListarDronesServicio(droneRepository);
 
-        ModificarDroneUseCase modificarDrone =
-                new ModificarDroneServicio(
-                        droneRepository);
+        /* OBSERVER: adaptador de salida hacia Open-Meteo y servicio de suscripciones */
+        WeatherProvider weatherProvider = new OpenWeatherAdapter(
+                new GeoApiAdapter(new GeoApiClient()),
+                new OpenWeatherClient());
 
-        EliminarDroneUseCase eliminarDrone =
-                new EliminarDroneServicio(
-                        droneRepository);
+        GetWeatherByCityUseCase getWeatherByCity = new GetWeatherByCityServicio(weatherProvider);
+        WeatherNotificationService notificacionClima = new WeatherNotificationService(getWeatherByCity);
 
-        BuscarDroneUseCase buscarDrone =
-                new BuscarDroneServicio(
-                        droneRepository);
+        /* CHAIN OF RESPONSIBILITY: validacion de la viabilidad de vuelo */
+        ValidarClimaUseCase validarClima = new ValidarClimaServicio();
 
-        ListarDronesUseCase listarDrones =
-                new ListarDronesServicio(
-                        droneRepository);
+        /* CARGADOR FXML (drone.fxml incluye clima.fxml en su segunda pestana) */
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/co/edu/poli/sw2/vista/drone.fxml"));
 
-        /*
-         * Clima (patron Observer): adaptador de salida hacia las
-         * APIs de Open-Meteo, caso de uso de consulta y servicio que
-         * administra un notificador por ciudad.
-         */
-        WeatherProvider weatherProvider =
-                new OpenWeatherAdapter(
-                        new GeoApiAdapter(new GeoApiClient()),
-                        new OpenWeatherClient());
+        /* INYECCION de los puertos en los adaptadores de entrada */
+        loader.setControllerFactory(controllerClass -> {
 
-        GetWeatherByCityUseCase getWeatherByCity =
-                new GetWeatherByCityServicio(
-                        weatherProvider);
+            if (controllerClass == ControlDrone.class) {
+                return new ControlDrone(crearDrone, modificarDrone, eliminarDrone,
+                        buscarDrone, listarDrones, notificacionClima);
+            }
 
-        WeatherNotificationService notificacionClima =
-                new WeatherNotificationService(
-                        getWeatherByCity);
+            if (controllerClass == ControlClima.class) {
+                return new ControlClima(notificacionClima, notificacionClima,
+                        listarDrones, validarClima);
+            }
 
-        /*
-         * CARGADOR FXML
-         */
-        FXMLLoader loader =
-                new FXMLLoader(
-                        getClass().getResource(
-                                "/co/edu/poli/sw2/vista/drone.fxml"));
+            try {
+                return controllerClass.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException("No fue posible crear el controlador.", e);
+            }
+        });
 
-        /*
-         * INYECCION DE LOS PUERTOS EN EL
-         * ADAPTADOR DE ENTRADA
-         */
-        loader.setControllerFactory(
-                controllerClass -> {
+        Parent root = loader.load();
 
-                    if (controllerClass
-                            == ControlDrone.class) {
-
-                        return new ControlDrone(
-                                crearDrone,
-                                modificarDrone,
-                                eliminarDrone,
-                                buscarDrone,
-                                listarDrones,
-                                notificacionClima);
-                    }
-
-                    if (controllerClass
-                            == ControlClima.class) {
-
-                        return new ControlClima(
-                                notificacionClima,
-                                notificacionClima,
-                                listarDrones);
-                    }
-
-                    try {
-
-                        return controllerClass
-                                .getDeclaredConstructor()
-                                .newInstance();
-
-                    } catch (Exception e) {
-
-                        throw new RuntimeException(
-                                "No fue posible crear el controlador.",
-                                e);
-                    }
-                });
-
-        Parent root =
-                loader.load();
-
-        Scene scene =
-                new Scene(
-                        root,
-                        1100,
-                        720);
-
-        stage.setTitle(
-                "Gestion de Drones - Arquitectura Hexagonal");
-
-        stage.setScene(scene);
-
+        stage.setTitle("Gestion de Drones - Arquitectura Hexagonal");
+        stage.setScene(new Scene(root, 1100, 720));
         stage.show();
     }
 
@@ -175,7 +108,6 @@ public class App extends Application {
      * @param args argumentos de linea de comandos
      */
     public static void main(String[] args) {
-
         launch(args);
     }
 }
