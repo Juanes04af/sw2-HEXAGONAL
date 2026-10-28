@@ -20,7 +20,12 @@ import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.ModificarDroneServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.ValidarClimaServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.WeatherNotificationService;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.persistencia.PostgresDroneRepository;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.CalcularConsumoUseCase;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.CalcularConsumoServicio;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.loader.JsonRutaLoader;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.util.HaversineUtil;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlClima;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlConsumo;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlDrone;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.GeoApiAdapter;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.GeoApiClient;
@@ -71,7 +76,11 @@ public class App extends Application {
         /* CHAIN OF RESPONSIBILITY: validacion de la viabilidad de vuelo */
         ValidarClimaUseCase validarClima = new ValidarClimaServicio();
 
-        /* CARGADOR FXML (drone.fxml incluye clima.fxml en su segunda pestana) */
+        /* STRATEGY: ruta desde JSON, distancia con Haversine y contexto de consumo */
+        CalcularConsumoUseCase calcularConsumo = new CalcularConsumoServicio(
+                new JsonRutaLoader(), new HaversineUtil());
+
+        /* CARGADOR FXML (drone.fxml incluye clima.fxml y consumo.fxml en sus pestanas) */
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/co/edu/poli/sw2/vista/drone.fxml"));
 
@@ -86,6 +95,10 @@ public class App extends Application {
             if (controllerClass == ControlClima.class) {
                 return new ControlClima(notificacionClima, notificacionClima,
                         listarDrones, validarClima);
+            }
+
+            if (controllerClass == ControlConsumo.class) {
+                return new ControlConsumo(calcularConsumo, listarDrones);
             }
 
             try {

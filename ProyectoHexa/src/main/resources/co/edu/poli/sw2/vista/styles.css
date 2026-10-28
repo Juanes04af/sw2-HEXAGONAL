@@ -144,3 +144,10 @@
     -fx-alignment: CENTER_LEFT;
     -fx-padding: 0 8 0 8;
 }
+/* ---------- Pestana Consumo (Strategy) ---------- */
+
+.valor-destacado {
+    -fx-text-fill: #1e8449;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}

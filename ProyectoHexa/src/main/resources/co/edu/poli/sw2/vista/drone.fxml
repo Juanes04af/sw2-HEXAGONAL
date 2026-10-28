@@ -351,6 +351,17 @@
 
                 </Tab>
 
+                <!-- Pestana 3: consumo de bateria por estrategia (Strategy) -->
+                <Tab text="Consumo">
+
+                    <content>
+
+                        <fx:include source="consumo.fxml" />
+
+                    </content>
+
+                </Tab>
+
             </tabs>
 
         </TabPane>

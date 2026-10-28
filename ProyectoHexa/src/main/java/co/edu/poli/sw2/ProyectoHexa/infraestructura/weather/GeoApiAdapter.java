@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import co.edu.poli.sw2.ProyectoHexa.dominio.clima.Ciudad;
 import co.edu.poli.sw2.ProyectoHexa.dominio.excepcion.ClimaException;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.util.LectorJson;
 
 /**
  * Adaptador de la geocodificacion: convierte una {@link Ciudad} en sus

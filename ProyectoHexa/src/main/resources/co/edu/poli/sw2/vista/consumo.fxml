@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Pestana de consumo: calculo de la bateria requerida para recorrer la
+  ruta del archivo JSON segun la estrategia elegida (patron Strategy).
+  Autores: Alejandra Cano y Juan Rosero
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane
+        xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        fx:controller="co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlConsumo">
+
+    <!-- RUTA Y SELECCION -->
+    <left>
+
+        <VBox prefWidth="330" spacing="15">
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16" />
+            </padding>
+
+            <VBox spacing="6" styleClass="tarjeta">
+                <Label styleClass="titulo-seccion" text="RUTA (ARCHIVO JSON)" />
+                <Label styleClass="etiqueta-campo" text="Origen" />
+                <Label fx:id="lblOrigen" text="-" wrapText="true" />
+                <Label styleClass="etiqueta-campo" text="Destino" />
+                <Label fx:id="lblDestino" text="-" wrapText="true" />
+                <Label styleClass="etiqueta-campo" text="Distancia (Haversine)" />
+                <Label fx:id="lblDistanciaRuta" text="-" />
+            </VBox>
+
+            <VBox spacing="9" styleClass="tarjeta">
+                <Label styleClass="titulo-seccion" text="CALCULO DE CONSUMO" />
+                <Label styleClass="etiqueta-campo" text="Drone" />
+                <ComboBox fx:id="cmbDrone" maxWidth="Infinity" promptText="Seleccione un drone" />
+                <Label styleClass="etiqueta-campo" text="Estrategia de consumo" />
+                <ComboBox fx:id="cmbEstrategia" maxWidth="Infinity" promptText="Seleccione una estrategia" />
+                <Button fx:id="btnCalcular" maxWidth="Infinity" onAction="#calcular"
+                        styleClass="boton,boton-primario" text="Calcular" />
+            </VBox>
+
+            <Label fx:id="lblMensaje" wrapText="true" />
+        </VBox>
+
+    </left>
+
+    <!-- RESULTADO E HISTORIAL -->
+    <center>
+
+        <VBox spacing="15">
+            <BorderPane.margin>
+                <Insets top="16" right="16" bottom="16" left="0" />
+            </BorderPane.margin>
+
+            <VBox spacing="10" styleClass="tarjeta">
+                <Label styleClass="titulo-seccion" text="RESULTADO" />
+
+                <GridPane hgap="12" vgap="8">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="150" />
+                        <ColumnConstraints hgrow="ALWAYS" />
+                    </columnConstraints>
+
+                    <Label styleClass="etiqueta-campo" text="Drone"
+                           GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <Label fx:id="lblResDrone" text="-"
+                           GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                    <Label styleClass="etiqueta-campo" text="Distancia"
+                           GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <Label fx:id="lblResDistancia" text="-"
+                           GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                    <Label styleClass="etiqueta-campo" text="Estrategia"
+                           GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                    <Label fx:id="lblResEstrategia" text="-"
+                           GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                    <Label styleClass="etiqueta-campo" text="Calculo"
+                           GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                    <Label fx:id="lblResCalculo" text="-"
+                           GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                    <Label styleClass="etiqueta-campo" text="Bateria requerida"
+                           GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                    <Label fx:id="lblResConsumo" styleClass="valor-destacado" text="-"
+                           GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                </GridPane>
+            </VBox>
+
+            <VBox spacing="10" styleClass="tarjeta" VBox.vgrow="ALWAYS">
+                <Label styleClass="titulo-seccion" text="HISTORIAL DE CALCULOS" />
+
+                <TableView fx:id="tablaHistorial" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colDrone" prefWidth="150" text="Drone" />
+                        <TableColumn fx:id="colEstrategia" prefWidth="170" text="Estrategia" />
+                        <TableColumn fx:id="colDistancia" prefWidth="110" text="Distancia" />
+                        <TableColumn fx:id="colCalculo" prefWidth="180" text="Calculo" />
+                        <TableColumn fx:id="colConsumo" prefWidth="110" text="Bateria" />
+                    </columns>
+                    <placeholder>
+                        <Label text="Aun no hay calculos." />
+                    </placeholder>
+                </TableView>
+            </VBox>
+        </VBox>
+
+    </center>
+
+</BorderPane>

@@ -6,6 +6,7 @@ import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.salida.WeatherProvider;
 import co.edu.poli.sw2.ProyectoHexa.dominio.clima.Ciudad;
 import co.edu.poli.sw2.ProyectoHexa.dominio.clima.Weather;
 import co.edu.poli.sw2.ProyectoHexa.dominio.excepcion.ClimaException;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.util.LectorJson;
 
 /**
  * Adaptador de salida que implementa {@link WeatherProvider} con las

@@ -1,0 +1,12 @@
+{
+  "origen": {
+    "nombre": "Centro de Bogota",
+    "latitud": 4.60971,
+    "longitud": -74.08175
+  },
+  "destino": {
+    "nombre": "Aeropuerto El Dorado",
+    "latitud": 4.70159,
+    "longitud": -74.14690
+  }
+}
