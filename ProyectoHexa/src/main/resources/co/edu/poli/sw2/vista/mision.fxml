@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Pestana de mision: programacion de una secuencia de tareas y su
+  ejecucion en orden (patron Command).
+  Autores: Alejandra Cano y Juan Rosero
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane
+        xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        fx:controller="co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlMision">
+
+    <!-- PROGRAMACION DE TAREAS -->
+    <left>
+
+        <VBox prefWidth="330" spacing="15">
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16" />
+            </padding>
+
+            <VBox spacing="9" styleClass="tarjeta">
+                <Label styleClass="titulo-seccion" text="PROGRAMAR TAREA" />
+                <Label styleClass="etiqueta-campo" text="Drone" />
+                <ComboBox fx:id="cmbDrone" maxWidth="Infinity" promptText="Seleccione un drone" />
+                <Label styleClass="etiqueta-campo" text="Tarea" />
+                <ComboBox fx:id="cmbTarea" maxWidth="Infinity" promptText="Seleccione una tarea" />
+                <Button maxWidth="Infinity" onAction="#agregarTarea"
+                        styleClass="boton,boton-secundario" text="Agregar a la mision" />
+            </VBox>
+
+            <VBox spacing="9" styleClass="tarjeta" VBox.vgrow="ALWAYS">
+                <Label styleClass="titulo-seccion" text="TAREAS PROGRAMADAS (EN ORDEN)" />
+
+                <ListView fx:id="listaTareas" prefHeight="170" VBox.vgrow="ALWAYS">
+                    <placeholder>
+                        <Label text="No hay tareas programadas." />
+                    </placeholder>
+                </ListView>
+
+                <GridPane hgap="8" vgap="8">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50" />
+                        <ColumnConstraints percentWidth="50" />
+                    </columnConstraints>
+
+                    <Button maxWidth="Infinity" onAction="#quitarTarea"
+                            styleClass="boton,boton-peligro" text="Quitar"
+                            GridPane.columnIndex="0" GridPane.rowIndex="0" />
+
+                    <Button maxWidth="Infinity" onAction="#limpiarTareas"
+                            styleClass="boton,boton-neutro" text="Limpiar"
+                            GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                </GridPane>
+
+                <Button maxWidth="Infinity" onAction="#ejecutarMision"
+                        styleClass="boton,boton-primario" text="Ejecutar mision" />
+            </VBox>
+
+            <Label fx:id="lblMensaje" wrapText="true" />
+        </VBox>
+
+    </left>
+
+    <!-- RESULTADOS -->
+    <center>
+
+        <VBox spacing="10" styleClass="tarjeta">
+            <BorderPane.margin>
+                <Insets top="16" right="16" bottom="16" left="0" />
+            </BorderPane.margin>
+
+            <Label styleClass="titulo-seccion" text="RESULTADOS DE LA ULTIMA MISION" />
+
+            <TableView fx:id="tablaResultados" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colOrden" prefWidth="45" text="#" />
+                    <TableColumn fx:id="colTarea" prefWidth="140" text="Tarea" />
+                    <TableColumn fx:id="colDrone" prefWidth="120" text="Drone" />
+                    <TableColumn fx:id="colEstado" prefWidth="70" text="Estado" />
+                    <TableColumn fx:id="colResultado" prefWidth="380" text="Resultado" />
+                </columns>
+                <placeholder>
+                    <Label text="Programe tareas y pulse Ejecutar mision." />
+                </placeholder>
+            </TableView>
+        </VBox>
+
+    </center>
+
+</BorderPane>
