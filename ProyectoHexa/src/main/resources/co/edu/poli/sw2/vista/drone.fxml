@@ -362,6 +362,17 @@
 
                 </Tab>
 
+                <!-- Pestana 4: programacion de tareas de una mision (Command) -->
+                <Tab text="Mision">
+
+                    <content>
+
+                        <fx:include source="mision.fxml" />
+
+                    </content>
+
+                </Tab>
+
             </tabs>
 
         </TabPane>

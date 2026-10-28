@@ -26,6 +26,11 @@ import co.edu.poli.sw2.ProyectoHexa.infraestructura.loader.JsonRutaLoader;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.util.HaversineUtil;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlClima;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlConsumo;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlMision;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ProgramarMisionUseCase;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.DroneOperacionService;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.ProgramadorTareas;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.ProgramarMisionServicio;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlDrone;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.GeoApiAdapter;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.weather.GeoApiClient;
@@ -80,7 +85,12 @@ public class App extends Application {
         CalcularConsumoUseCase calcularConsumo = new CalcularConsumoServicio(
                 new JsonRutaLoader(), new HaversineUtil());
 
-        /* CARGADOR FXML (drone.fxml incluye clima.fxml y consumo.fxml en sus pestanas) */
+        /* COMMAND: receptor (operaciones del dron), invocador y cliente */
+        ProgramarMisionUseCase programarMision = new ProgramarMisionServicio(
+                new DroneOperacionService(notificacionClima),
+                new ProgramadorTareas());
+
+        /* CARGADOR FXML (drone.fxml incluye clima.fxml, consumo.fxml y mision.fxml en sus pestanas) */
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/co/edu/poli/sw2/vista/drone.fxml"));
 
@@ -95,6 +105,10 @@ public class App extends Application {
             if (controllerClass == ControlClima.class) {
                 return new ControlClima(notificacionClima, notificacionClima,
                         listarDrones, validarClima);
+            }
+
+            if (controllerClass == ControlMision.class) {
+                return new ControlMision(programarMision, listarDrones);
             }
 
             if (controllerClass == ControlConsumo.class) {
