@@ -151,3 +151,11 @@
     -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
+
+/* ---------- Pestana Operacion (Mediator) ---------- */
+
+.valor-cancelado {
+    -fx-text-fill: #c0392b;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}

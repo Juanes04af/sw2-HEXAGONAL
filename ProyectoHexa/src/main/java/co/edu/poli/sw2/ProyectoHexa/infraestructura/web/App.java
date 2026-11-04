@@ -27,6 +27,14 @@ import co.edu.poli.sw2.ProyectoHexa.infraestructura.util.HaversineUtil;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlClima;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlConsumo;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlMision;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlOperacion;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.mediator.MissionCoordinator;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.mediator.components.BatterySystem;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.mediator.components.CommunicationSystem;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.mediator.components.NavigationSystem;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.mediator.components.SensorSystem;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ExecuteMissionUseCase;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.MissionService;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ProgramarMisionUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.DroneOperacionService;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.ProgramadorTareas;
@@ -90,7 +98,15 @@ public class App extends Application {
                 new DroneOperacionService(notificacionClima),
                 new ProgramadorTareas());
 
-        /* CARGADOR FXML (drone.fxml incluye clima.fxml, consumo.fxml y mision.fxml en sus pestanas) */
+        /* MEDIATOR: componentes, coordinador (mediador) y servicio de mision */
+        ExecuteMissionUseCase executeMission = new MissionService(
+                new MissionCoordinator(
+                        new NavigationSystem(new JsonRutaLoader(), new HaversineUtil()),
+                        new SensorSystem(),
+                        new BatterySystem(),
+                        new CommunicationSystem()));
+
+        /* CARGADOR FXML (drone.fxml incluye clima.fxml, consumo.fxml, mision.fxml y operacion.fxml en sus pestanas) */
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/co/edu/poli/sw2/vista/drone.fxml"));
 
@@ -109,6 +125,10 @@ public class App extends Application {
 
             if (controllerClass == ControlMision.class) {
                 return new ControlMision(programarMision, listarDrones);
+            }
+
+            if (controllerClass == ControlOperacion.class) {
+                return new ControlOperacion(executeMission);
             }
 
             if (controllerClass == ControlConsumo.class) {
