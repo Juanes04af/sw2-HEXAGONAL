@@ -128,7 +128,7 @@ public class App extends Application {
             }
 
             if (controllerClass == ControlOperacion.class) {
-                return new ControlOperacion(executeMission);
+                return new ControlOperacion(executeMission, listarDrones);
             }
 
             if (controllerClass == ControlConsumo.class) {

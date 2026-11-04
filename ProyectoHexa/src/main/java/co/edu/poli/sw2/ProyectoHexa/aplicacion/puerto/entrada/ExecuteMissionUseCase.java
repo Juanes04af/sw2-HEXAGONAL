@@ -1,12 +1,15 @@
 package co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada;
 
+import co.edu.poli.sw2.ProyectoHexa.dominio.modelo.Drone;
+
 /**
  * Puerto de entrada para iniciar una operacion de vigilancia
  * coordinada por el patron Mediator.
  *
  * <p>
- * No usa las operaciones CRUD de drones: el dron de la operacion se
- * crea solo en memoria con los datos que ingresa el usuario.
+ * Recibe un dron ya existente (leido de la base de datos y convertido
+ * al modelo {@link Drone}) y lo entrega al mediador. Este caso de uso
+ * no crea, modifica ni elimina drones.
  * </p>
  *
  * @author Alejandra Cano y Juan Rosero
@@ -16,12 +19,9 @@ public interface ExecuteMissionUseCase {
     /**
      * Inicia una operacion de vigilancia.
      *
-     * @param serial           serial del dron
-     * @param modelo           modelo del dron; opcional
-     * @param deteccionTermica {@code true} si el dron tiene camara termica
-     * @param nivelBateria     bateria actual, de 0 a 100 %
+     * @param drone        dron registrado que hara la operacion
+     * @param nivelBateria bateria actual del dron, de 0 a 100 %
      * @return resultado de la coordinacion
      */
-    ResultadoMision ejecutarMision(String serial, String modelo, boolean deteccionTermica,
-                                   int nivelBateria);
+    ResultadoMision ejecutarMision(Drone drone, int nivelBateria);
 }

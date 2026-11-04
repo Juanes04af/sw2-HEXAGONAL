@@ -16,8 +16,8 @@ import co.edu.poli.sw2.ProyectoHexa.dominio.modelo.Drone;
 import co.edu.poli.sw2.ProyectoHexa.dominio.modelo.Vigilancia;
 
 /**
- * Pruebas de {@link MissionService}: crea el dron en memoria y lo
- * entrega al mediador, sin usar el repositorio de drones.
+ * Pruebas de {@link MissionService}: recibe un dron existente y lo
+ * entrega al mediador sin modificarlo.
  *
  * @author Alejandra Cano y Juan Rosero
  */
@@ -42,37 +42,37 @@ class MissionServiceTest {
     }
 
     @Test
-    @DisplayName("Crea un dron de vigilancia en memoria y lo entrega al mediador")
-    void creaDronEnMemoria() {
+    @DisplayName("Entrega al mediador el mismo dron registrado y su bateria")
+    void entregaDronExistente() {
         MediadorEspia mediador = new MediadorEspia();
+        Drone registrado = new Vigilancia(7, "VIG-007", "DJI", "Mavic 3", 0.9, true);
 
-        new MissionService(mediador).ejecutarMision("  VIG-OP-01 ", " Mavic 3 ", true, 75);
+        new MissionService(mediador).ejecutarMision(registrado, 75);
 
-        assertTrue(mediador.drone instanceof Vigilancia);
-        assertEquals(0, mediador.drone.getId());
-        assertEquals("VIG-OP-01", mediador.drone.getSerial());
-        assertEquals("Mavic 3", mediador.drone.getModelo());
-        assertTrue(((Vigilancia) mediador.drone).isDeteccionTermica());
+        assertSame(registrado, mediador.drone);
         assertEquals(75, mediador.nivel);
     }
 
     @Test
-    @DisplayName("El modelo es opcional")
-    void modeloOpcional() {
-        MediadorEspia mediador = new MediadorEspia();
+    @DisplayName("El dron no se modifica al pasar por el servicio")
+    void noModificaElDron() {
+        Drone registrado = new Vigilancia(7, "VIG-007", "DJI", "Mavic 3", 0.9, true);
 
-        new MissionService(mediador).ejecutarMision("VIG-1", "  ", false, 50);
+        new MissionService(new MediadorEspia()).ejecutarMision(registrado, 50);
 
-        assertNull(mediador.drone.getModelo());
+        assertEquals(7, registrado.getId());
+        assertEquals("VIG-007", registrado.getSerial());
+        assertEquals("Mavic 3", registrado.getModelo());
+        assertEquals(0.9, registrado.getPeso(), 0.0001);
     }
 
     @Test
-    @DisplayName("Un serial invalido es rechazado antes de llegar al mediador")
-    void serialInvalido() {
+    @DisplayName("Sin dron seleccionado, la operacion es rechazada antes del mediador")
+    void sinDron_rechazado() {
         MediadorEspia mediador = new MediadorEspia();
 
         assertThrows(DronValidacionException.class,
-                () -> new MissionService(mediador).ejecutarMision("", "M", false, 50));
+                () -> new MissionService(mediador).ejecutarMision(null, 50));
         assertNull(mediador.drone);
     }
 }
