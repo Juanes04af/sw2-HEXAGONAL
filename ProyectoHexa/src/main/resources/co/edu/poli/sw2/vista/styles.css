@@ -152,6 +152,7 @@
     -fx-font-weight: bold;
 }
 
+<<<<<<< HEAD
 /* ---------- Pestana Estado (State) ---------- */
 .nodo-estado {
     -fx-background-color: #eceff1;
@@ -163,3 +164,12 @@
 }
 .nodo-activo { -fx-background-color: #1e8449; -fx-text-fill: white; }
 .flecha-estado { -fx-text-fill: #7f8c8d; -fx-font-size: 14px; }
+=======
+/* ---------- Pestana Operacion (Mediator) ---------- */
+
+.valor-cancelado {
+    -fx-text-fill: #c0392b;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+>>>>>>> refs/remotes/origin/Juan

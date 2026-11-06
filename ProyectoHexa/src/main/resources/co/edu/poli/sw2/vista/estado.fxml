@@ -98,14 +98,6 @@
                 </TableView>
             </VBox>
 
-            <VBox spacing="10" styleClass="tarjeta">
-                <Label styleClass="titulo-seccion" text="HISTORIAL DE TRANSICIONES" />
-                <ListView fx:id="listaHistorial" prefHeight="120">
-                    <placeholder>
-                        <Label text="Aun no hay operaciones." />
-                    </placeholder>
-                </ListView>
-            </VBox>
         </VBox>
     </center>
 

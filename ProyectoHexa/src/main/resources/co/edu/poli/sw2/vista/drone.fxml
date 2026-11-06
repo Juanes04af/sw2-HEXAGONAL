@@ -378,6 +378,17 @@
     				</content>
 				</Tab>
 
+                <!-- Pestana 5: operacion de vigilancia coordinada (Mediator) -->
+                <Tab text="Operacion">
+
+                    <content>
+
+                        <fx:include source="operacion.fxml" />
+
+                    </content>
+
+                </Tab>
+
             </tabs>
 
         </TabPane>

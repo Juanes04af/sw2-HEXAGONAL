@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Pestana de operacion: inicio de una mision de vigilancia coordinada
+  por un mediador (patron Mediator) con un dron ya registrado.
+  Autores: Alejandra Cano y Juan Rosero
+-->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane
+        xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        fx:controller="co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlOperacion">
+
+    <!-- DATOS DE LA OPERACION -->
+    <left>
+
+        <VBox prefWidth="330" spacing="15">
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16" />
+            </padding>
+
+            <VBox spacing="9" styleClass="tarjeta">
+                <Label styleClass="titulo-seccion" text="OPERACION DE VIGILANCIA" />
+
+                <Label styleClass="etiqueta-campo" text="Drone registrado" />
+                <ComboBox fx:id="cmbDrone" maxWidth="Infinity" promptText="Seleccione un drone" />
+                <Label fx:id="lblInfoDrone" styleClass="etiqueta-campo" text="" wrapText="true" />
+
+                <Label fx:id="lblBateria" styleClass="etiqueta-campo" text="Nivel de bateria: 80 %" />
+                <Slider fx:id="sldBateria" blockIncrement="5" majorTickUnit="20" max="100"
+                        min="0" showTickLabels="true" showTickMarks="true" value="80" />
+
+                <Button fx:id="btnIniciar" maxWidth="Infinity" onAction="#iniciarOperacion"
+                        styleClass="boton,boton-primario" text="Iniciar operacion de vigilancia" />
+            </VBox>
+
+            <Label fx:id="lblMensaje" wrapText="true" />
+        </VBox>
+
+    </left>
+
+    <!-- SECUENCIA COORDINADA -->
+    <center>
+
+        <VBox spacing="10" styleClass="tarjeta">
+            <BorderPane.margin>
+                <Insets top="16" right="16" bottom="16" left="0" />
+            </BorderPane.margin>
+
+            <Label styleClass="titulo-seccion" text="SECUENCIA COORDINADA POR EL MEDIADOR" />
+
+            <ProgressBar fx:id="barraProgreso" maxWidth="Infinity" progress="0" />
+
+            <Label fx:id="lblResultado" styleClass="etiqueta-campo" text="Esperando operacion..."
+                   wrapText="true" />
+
+            <TableView fx:id="tablaPasos" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colOrden" prefWidth="40" text="#" />
+                    <TableColumn fx:id="colComponente" prefWidth="170" text="Componente" />
+                    <TableColumn fx:id="colEvento" prefWidth="140" text="Evento" />
+                    <TableColumn fx:id="colEstado" prefWidth="110" text="Estado" />
+                    <TableColumn fx:id="colDetalle" prefWidth="330" text="Detalle" />
+                </columns>
+                <placeholder>
+                    <Label text="Seleccione un drone y pulse Iniciar operacion." />
+                </placeholder>
+            </TableView>
+        </VBox>
+
+    </center>
+
+</BorderPane>
