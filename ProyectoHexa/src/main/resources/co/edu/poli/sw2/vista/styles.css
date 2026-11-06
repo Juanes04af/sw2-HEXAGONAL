@@ -151,3 +151,15 @@
     -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
+
+/* ---------- Pestana Estado (State) ---------- */
+.nodo-estado {
+    -fx-background-color: #eceff1;
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 16 10 16;
+    -fx-background-radius: 20;
+}
+.nodo-activo { -fx-background-color: #1e8449; -fx-text-fill: white; }
+.flecha-estado { -fx-text-fill: #7f8c8d; -fx-font-size: 14px; }

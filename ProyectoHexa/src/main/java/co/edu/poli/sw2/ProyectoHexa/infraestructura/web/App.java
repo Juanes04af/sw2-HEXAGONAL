@@ -7,12 +7,14 @@ import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.CrearDroneUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.EliminarDroneUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.GetWeatherByCityUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ListarDronesUseCase;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ManageDroneStateUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ModificarDroneUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ValidarClimaUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.salida.DroneRepository;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.salida.WeatherProvider;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.BuscarDroneServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.CrearDroneServicio;
+import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.DroneStateService;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.EliminarDroneServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.GetWeatherByCityServicio;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.ListarDronesServicio;
@@ -26,6 +28,7 @@ import co.edu.poli.sw2.ProyectoHexa.infraestructura.loader.JsonRutaLoader;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.util.HaversineUtil;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlClima;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlConsumo;
+import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlEstado;
 import co.edu.poli.sw2.ProyectoHexa.infraestructura.ui.ControlMision;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.puerto.entrada.ProgramarMisionUseCase;
 import co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio.DroneOperacionService;
@@ -90,7 +93,10 @@ public class App extends Application {
                 new DroneOperacionService(notificacionClima),
                 new ProgramadorTareas());
 
-        /* CARGADOR FXML (drone.fxml incluye clima.fxml, consumo.fxml y mision.fxml en sus pestanas) */
+        /* STATE: estado operativo de los drones (wrapper DroneConEstado por dron) */
+        ManageDroneStateUseCase gestionEstado = new DroneStateService();
+
+        /* CARGADOR FXML (drone.fxml incluye clima, consumo, mision y estado en sus pestanas) */
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/co/edu/poli/sw2/vista/drone.fxml"));
 
@@ -113,6 +119,10 @@ public class App extends Application {
 
             if (controllerClass == ControlConsumo.class) {
                 return new ControlConsumo(calcularConsumo, listarDrones);
+            }
+
+            if (controllerClass == ControlEstado.class) {
+                return new ControlEstado(gestionEstado, listarDrones);
             }
 
             try {
