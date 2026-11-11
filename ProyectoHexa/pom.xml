@@ -21,6 +21,11 @@
 
         <!-- SonarQube lee la cobertura de JaCoCo -->
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+
+        <!-- Los controladores JavaFX y la clase App necesitan la ventana abierta
+             para probarse (no son pruebas unitarias). Se excluyen solo de la
+             COBERTURA; Sonar los sigue analizando en bugs, seguridad y duplicados. -->
+        <sonar.coverage.exclusions>**/infraestructura/ui/**,**/infraestructura/web/**</sonar.coverage.exclusions>
     </properties>
 
     <dependencies>

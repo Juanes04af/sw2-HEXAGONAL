@@ -239,16 +239,7 @@ public class ControlOperacion implements Initializable {
      */
     private void cargarDrones() {
         try {
-            Drone seleccionado = cmbDrone.getValue();
-            List<Drone> drones = listarDrones.listar();
-            cmbDrone.setItems(FXCollections.observableArrayList(drones));
-
-            if (seleccionado != null) {
-                drones.stream()
-                      .filter(seleccionado::equals)
-                      .findFirst()
-                      .ifPresent(cmbDrone::setValue);
-            }
+            SelectorDrones.recargar(cmbDrone, listarDrones);
         } catch (DronException e) {
             lblMensaje.setText(e.getMessage());
         }

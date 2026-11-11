@@ -37,10 +37,13 @@ class SensorTest {
     @Test
     @DisplayName("Sensores con distinto id, null u otro tipo de objeto no son iguales")
     void noIguales() {
-        assertEquals(sensor, sensor);
+        Sensor mismo = sensor;
+        Object texto = "texto";
+
+        assertEquals(sensor, mismo);
         assertNotEquals(sensor, new Sensor(2, "Termico", "FLIR"));
         assertNotEquals(sensor, null);
-        assertNotEquals(sensor, "texto");
+        assertNotEquals(sensor, texto);
     }
 
     @Test

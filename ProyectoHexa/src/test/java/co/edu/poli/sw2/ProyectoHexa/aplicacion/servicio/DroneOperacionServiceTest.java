@@ -3,6 +3,8 @@ package co.edu.poli.sw2.ProyectoHexa.aplicacion.servicio;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -81,8 +83,9 @@ class DroneOperacionServiceTest {
         String r = receptor.medirTemperatura(sinTermica);
 
         assertTrue(r.contains("lectura simulada"));
-        String numero = r.replaceAll(".*: (\\d+\\.\\d) .*", "$1");
-        double valor = Double.parseDouble(numero);
+        Matcher m = Pattern.compile(": (\\d{1,3}\\.\\d) ").matcher(r);
+        assertTrue(m.find());
+        double valor = Double.parseDouble(m.group(1));
         assertTrue(valor >= 10 && valor <= 30);
     }
 }

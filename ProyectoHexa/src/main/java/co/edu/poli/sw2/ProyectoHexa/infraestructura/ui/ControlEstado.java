@@ -28,7 +28,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.util.StringConverter;
 
 /**
  * Adaptador de entrada JavaFX de la pestana Estado.
@@ -173,17 +172,8 @@ public class ControlEstado implements Initializable {
     /** Recarga drones (combo y tabla) conservando la seleccion. */
     private void cargarDrones() {
         try {
-            Drone seleccionado = cmbDrone.getValue();
-            List<Drone> drones = listarDrones.listar();
-            cmbDrone.setItems(FXCollections.observableArrayList(drones));
+            List<Drone> drones = SelectorDrones.recargar(cmbDrone, listarDrones);
             tablaDrones.setItems(FXCollections.observableArrayList(drones));
-
-            if (seleccionado != null) {
-                drones.stream()
-                      .filter(seleccionado::equals)
-                      .findFirst()
-                      .ifPresent(cmbDrone::setValue);
-            }
         } catch (DronException e) {
             mostrarMensaje(e.getMessage(), true);
         }
@@ -213,24 +203,7 @@ public class ControlEstado implements Initializable {
     }
 
     private void mostrarMensaje(String mensaje, boolean error) {
-        lblMensaje.setText(mensaje);
-        lblMensaje.getStyleClass().removeAll("mensaje-ok", "mensaje-error");
-        lblMensaje.getStyleClass().add(error ? "mensaje-error" : "mensaje-ok");
+        MensajeVista.mostrar(lblMensaje, mensaje, error);
     }
 
-    /** Muestra cada dron en el selector como "#id - serial". */
-    private static final class ConvertidorDrone extends StringConverter<Drone> {
-
-        /** {@inheritDoc} */
-        @Override
-        public String toString(Drone drone) {
-            return drone == null ? "" : "#" + drone.getId() + " - " + drone.getSerial();
-        }
-
-        /** No se usa: el selector no es editable. */
-        @Override
-        public Drone fromString(String texto) {
-            return null;
-        }
-    }
 }

@@ -1,7 +1,6 @@
 package co.edu.poli.sw2.ProyectoHexa.infraestructura.ui;
 
 import java.net.URL;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -199,16 +198,7 @@ public class ControlConsumo implements Initializable {
      */
     private void cargarDrones() {
         try {
-            Drone seleccionado = cmbDrone.getValue();
-            List<Drone> drones = listarDrones.listar();
-            cmbDrone.setItems(FXCollections.observableArrayList(drones));
-
-            if (seleccionado != null) {
-                drones.stream()
-                      .filter(seleccionado::equals)
-                      .findFirst()
-                      .ifPresent(cmbDrone::setValue);
-            }
+            SelectorDrones.recargar(cmbDrone, listarDrones);
         } catch (DronException e) {
             mostrarMensaje(e.getMessage(), true);
         }
