@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import co.edu.poli.sw2.ProyectoHexa.dominio.excepcion.DronDuplicadoException;
@@ -28,7 +30,13 @@ import co.edu.poli.sw2.ProyectoHexa.dominio.modelo.Vigilancia;
  *
  * @author Alejandra Cano y Juan Rosero
  */
+@Tag("integration")
 class PostgresDroneRepositoryIT {
+
+    @BeforeAll
+    static void requierePostgres() {
+        PostgresDisponible.requerir();
+    }
 
     private final PostgresDroneRepository repositorio = new PostgresDroneRepository();
     private final List<Drone> creados = new ArrayList<>();
@@ -111,10 +119,14 @@ class PostgresDroneRepositoryIT {
     @Test
     @DisplayName("Listar solo devuelve drones de vigilancia")
     void listar_soloVigilancia() {
-        crearDePrueba(false);
+        Drone d = crearDePrueba(false);
+        List<Drone> todos = repositorio.listar();
 
-        for (Drone d : repositorio.listar()) {
-            assertEquals("VIGILANCIA", d.getTipo());
+        assertFalse(todos.isEmpty(), "La lista no deberia estar vacia");
+        assertTrue(todos.stream().anyMatch(x -> x.getId() == d.getId()));
+        for (Drone x : todos) {
+            assertTrue(x instanceof Vigilancia);
+            assertEquals("VIGILANCIA", x.getTipo());
         }
     }
 

@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.sql.Connection;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -13,7 +15,13 @@ import org.junit.jupiter.api.Test;
  *
  * @author Alejandra Cano y Juan Rosero
  */
+@Tag("integration")
 class ConexionBDIT {
+
+    @BeforeAll
+    static void requierePostgres() {
+        PostgresDisponible.requerir();
+    }
 
     @Test
     @DisplayName("El .env aporta usuario y contrasena")

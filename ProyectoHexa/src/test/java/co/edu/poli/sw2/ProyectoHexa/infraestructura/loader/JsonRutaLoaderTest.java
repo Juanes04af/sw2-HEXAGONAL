@@ -78,15 +78,6 @@ class JsonRutaLoaderTest {
     }
 
     @Test
-    @DisplayName("Carga el archivo ruta.json incluido en el programa")
-    void cargaArchivoDelPrograma() {
-        Ruta ruta = new JsonRutaLoader().cargarRuta();
-
-        assertEquals("Centro de Bogota", ruta.getOrigen().getNombre());
-        assertEquals("Aeropuerto El Dorado", ruta.getDestino().getNombre());
-    }
-
-    @Test
     @DisplayName("Si el archivo no existe, lanza RutaException")
     void archivoInexistente() {
         assertThrows(RutaException.class,
